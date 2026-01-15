@@ -40,6 +40,63 @@ body {
     overflow-x: hidden;
 }
 
+/* Floating Social Links */
+.floating-socials {
+    position: fixed;
+    left: 30px;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+    z-index: 100;
+}
+
+.social-link {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    background: transparent;
+}
+
+.social-link:hover {
+    color: var(--primary-color);
+    transform: translateY(-5px);
+    text-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+}
+
+.social-line {
+    width: 2px;
+    height: 100px;
+    background: linear-gradient(to top, var(--primary-color), transparent);
+    margin-top: 0.5rem;
+}
+
+/* Cursor Blink for Typing Effect */
+.cursor-blink {
+    animation: blink 1s step-end infinite;
+    color: var(--primary-color);
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 10px;
@@ -1199,5 +1256,15 @@ body {
 
     .circle {
         opacity: 0.5;
+    }
+
+    /* Hide floating socials on mobile */
+    .floating-socials {
+        display: none;
+    }
+
+    /* Reduce wave height on mobile */
+    .wave-divider svg {
+        height: 50px;
     }
 }
