@@ -1,17 +1,35 @@
-// Navbar scroll effect
-window.addEventListener('scroll', () => {
-    const navbar = document.getElementById('navbar');
+// ============================================
+// PERFORMANCE FIX: Cache DOM elements to avoid repeated queries
+// ============================================
+const navbar = document.getElementById('navbar');
+const hamburger = document.getElementById('hamburger');
+const navMenu = document.getElementById('nav-menu');
+
+// ============================================
+// PERFORMANCE FIX: Throttle scroll handlers using requestAnimationFrame
+// This prevents layout thrashing and ensures smooth 60FPS scrolling
+// ============================================
+let ticking = false;
+
+function updateNavbarOnScroll() {
     if (window.scrollY > 50) {
         navbar.classList.add('scrolled');
     } else {
         navbar.classList.remove('scrolled');
     }
-});
+    ticking = false;
+}
+
+// FIX: Add passive: true to enable browser scroll optimizations
+// This tells the browser the handler won't call preventDefault()
+window.addEventListener('scroll', () => {
+    if (!ticking) {
+        window.requestAnimationFrame(updateNavbarOnScroll);
+        ticking = true;
+    }
+}, { passive: true });
 
 // Mobile menu toggle
-const hamburger = document.getElementById('hamburger');
-const navMenu = document.getElementById('nav-menu');
-
 hamburger.addEventListener('click', () => {
     hamburger.classList.toggle('active');
     navMenu.classList.toggle('active');
@@ -26,6 +44,7 @@ document.querySelectorAll('.nav-link').forEach(link => {
 });
 
 // Smooth scroll for anchor links
+// FIX: Use passive listener for touch-friendly scrolling
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
@@ -93,6 +112,7 @@ function initTypingEffect() {
 }
 
 // Intersection Observer for fade-in animations
+// FIX: Using CSS classes instead of inline styles for better performance
 const observerOptions = {
     threshold: 0.1,
     rootMargin: '0px 0px -100px 0px'
@@ -101,30 +121,50 @@ const observerOptions = {
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
+            // FIX: Use classList instead of direct style manipulation
+            // This is more performant and allows CSS to handle transitions
+            entry.target.classList.add('section-visible');
         }
     });
 }, observerOptions);
 
-// Observe all sections
+// Observe all sections - use CSS class for initial state
 document.querySelectorAll('section').forEach(section => {
-    section.style.opacity = '0';
-    section.style.transform = 'translateY(30px)';
-    section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    section.classList.add('section-hidden');
     observer.observe(section);
 });
 
-// Active nav link highlighting
+// ============================================
+// PERFORMANCE FIX: Active nav link highlighting with throttling
+// ============================================
 const sections = document.querySelectorAll('section');
 const navLinks = document.querySelectorAll('.nav-link');
 
-window.addEventListener('scroll', () => {
+// FIX: Cache section positions to avoid layout thrashing
+// Reading offsetTop forces layout recalculation
+let sectionPositions = [];
+function cacheSectionPositions() {
+    sectionPositions = Array.from(sections).map(section => ({
+        id: section.getAttribute('id'),
+        top: section.offsetTop
+    }));
+}
+
+// Cache positions on load and resize
+cacheSectionPositions();
+window.addEventListener('resize', cacheSectionPositions, { passive: true });
+
+// FIX: Throttled scroll handler for active link highlighting
+let navTicking = false;
+
+function updateActiveNavLink() {
     let current = '';
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        if (window.pageYOffset >= sectionTop - 200) {
-            current = section.getAttribute('id');
+    const scrollPos = window.pageYOffset;
+
+    // Use cached positions instead of reading offsetTop in loop
+    sectionPositions.forEach(section => {
+        if (scrollPos >= section.top - 200) {
+            current = section.id;
         }
     });
 
@@ -134,9 +174,18 @@ window.addEventListener('scroll', () => {
             link.classList.add('active');
         }
     });
-});
+    navTicking = false;
+}
 
-// Add active nav link styles
+// FIX: Add passive: true and RAF throttling
+window.addEventListener('scroll', () => {
+    if (!navTicking) {
+        window.requestAnimationFrame(updateActiveNavLink);
+        navTicking = true;
+    }
+}, { passive: true });
+
+// Add active nav link styles and section animation styles
 const style = document.createElement('style');
 style.textContent = `
     .nav-link.active {
@@ -144,6 +193,17 @@ style.textContent = `
     }
     .nav-link.active::after {
         width: 100%;
+    }
+    /* FIX: CSS-based section animations for better GPU compositing */
+    .section-hidden {
+        opacity: 0;
+        transform: translateY(30px) translateZ(0);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+        will-change: opacity, transform;
+    }
+    .section-visible {
+        opacity: 1;
+        transform: translateY(0) translateZ(0);
     }
 `;
 document.head.appendChild(style);

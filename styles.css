@@ -32,6 +32,18 @@ html {
     scroll-behavior: smooth;
 }
 
+/* Mobile Performance: Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background-color: var(--dark-bg);
@@ -126,8 +138,12 @@ body {
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     z-index: 1000;
-    transition: all 0.4s var(--transition-smooth);
+    /* FIX: Only transition specific properties, not 'all' */
+    transition: background-color 0.4s var(--transition-smooth), box-shadow 0.4s var(--transition-smooth);
     border-bottom: 1px solid var(--glass-border);
+    /* FIX: GPU layer promotion for fixed positioning */
+    will-change: background-color;
+    transform: translateZ(0);
 }
 
 .navbar.scrolled {
@@ -248,6 +264,11 @@ body {
     filter: blur(60px);
     opacity: 0.7;
     animation: morphBlob 15s infinite ease-in-out;
+    /* FIX: GPU layer promotion for smooth animations */
+    will-change: transform;
+    transform: translateZ(0);
+    /* FIX: Isolate compositing layer */
+    contain: layout style paint;
 }
 
 .circle-1 {
@@ -627,13 +648,17 @@ body {
     padding: 2.5rem;
     border-radius: 20px;
     box-shadow: var(--shadow);
-    transition: all 0.4s var(--transition-smooth);
+    /* FIX: Transition only composite properties (transform, opacity) */
+    transition: transform 0.4s var(--transition-smooth), box-shadow 0.4s var(--transition-smooth);
     border-left: 4px solid var(--primary-color);
     border-top: 1px solid var(--glass-border);
     border-right: 1px solid var(--glass-border);
     border-bottom: 1px solid var(--glass-border);
     position: relative;
     overflow: hidden;
+    /* FIX: GPU layer promotion */
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .experience-card::before {
@@ -741,7 +766,8 @@ body {
     padding: 2rem;
     border-radius: 20px;
     box-shadow: var(--shadow);
-    transition: all 0.4s var(--transition-smooth);
+    /* FIX: Transition only composite properties */
+    transition: transform 0.4s var(--transition-smooth), box-shadow 0.4s var(--transition-smooth);
     display: flex;
     flex-direction: column;
     border: 1px solid var(--glass-border);
@@ -749,6 +775,9 @@ body {
     overflow: hidden;
     transform-style: preserve-3d;
     perspective: 1000px;
+    /* FIX: GPU layer promotion */
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .project-card::before {
@@ -855,10 +884,14 @@ body {
     padding: 2rem;
     border-radius: 20px;
     box-shadow: var(--shadow);
-    transition: all 0.4s var(--transition-smooth);
+    /* FIX: Transition only composite properties */
+    transition: transform 0.4s var(--transition-smooth), box-shadow 0.4s var(--transition-smooth);
     border: 1px solid var(--glass-border);
     position: relative;
     overflow: hidden;
+    /* FIX: GPU layer promotion */
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .skill-category::before {
@@ -945,10 +978,14 @@ body {
     border-radius: 20px;
     box-shadow: var(--shadow);
     text-align: center;
-    transition: all 0.4s var(--transition-smooth);
+    /* FIX: Transition only composite properties */
+    transition: transform 0.4s var(--transition-smooth), box-shadow 0.4s var(--transition-smooth);
     border: 1px solid var(--glass-border);
     position: relative;
     overflow: hidden;
+    /* FIX: GPU layer promotion */
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .achievement-card::before {
@@ -1299,6 +1336,10 @@ body {
 
     .circle {
         opacity: 0.5;
+        /* FIX: Reduce blur intensity on mobile for GPU performance */
+        filter: blur(30px);
+        /* FIX: Disable expensive morphing animation on mobile */
+        animation: none;
     }
 
     /* Hide floating socials on mobile */
@@ -1309,5 +1350,28 @@ body {
     /* Reduce wave height on mobile */
     .wave-divider svg {
         height: 50px;
+    }
+
+    /* FIX: Disable backdrop blur on low-power mobile devices */
+    .navbar,
+    .experience-card,
+    .project-card,
+    .skill-category,
+    .achievement-card {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: var(--light-bg);
+    }
+
+    /* FIX: Disable 3D transforms on mobile */
+    .project-card:hover {
+        transform: translateY(-8px) translateZ(0);
+    }
+
+    /* FIX: Simplify hover effects on mobile */
+    .experience-card:hover,
+    .skill-category:hover,
+    .achievement-card:hover {
+        transform: translateY(-8px) translateZ(0);
     }
 }
