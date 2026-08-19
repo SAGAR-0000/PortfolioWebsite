@@ -40,25 +40,6 @@ This portfolio is a personalized space designed to highlight my technical expert
 - **Font Awesome**: Icon library for social media and visual elements
 - **Google Fonts (Inter)**: Modern, clean typography
 
-## Project Structure
-
-The project structure follows a standard static website layout. Key files include:
-
-- `index.html`: Contains all HTML markup and sections
-- `styles.css`: Complete styling including responsive design and animations
-- `script.js`: Interactive features and scroll animations
-
-## Contributing
-
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/SAGAR-0000/PortfolioWebsite/issues).
-
-If you'd like to contribute:
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
